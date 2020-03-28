@@ -5,22 +5,12 @@ public class HashTable {
     private static final int DEFAULT_INITIAL_CAPACITY = 2048;
     private static final double DEFAULT_LOADFACTOR = 0.5;
 
-    private entry[] table;
+    private Entry[] table;
     private boolean[] used;
     private int size = 0;
     private final double loadFactor;
     private int capacity;
     private int threshold;
-
-    private static class entry {
-        private Object Key;
-        private Object Value;
-
-        entry(Object key, Object value) {
-            this.Key = key;
-            this.Value = value;
-        }
-    }
 
     HashTable() {
         this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOADFACTOR);
@@ -33,11 +23,21 @@ public class HashTable {
     HashTable(int initialCapacity, double loadFactor) {
         this.capacity = getNextPowOfTwo(initialCapacity);
         this.loadFactor = loadFactor;
-        table = new entry[capacity];
+        table = new Entry[capacity];
         used = new boolean[capacity];
         threshold = (int) (capacity * loadFactor);
         for (int i = 0; i < capacity; i++) {
             used[i] = false;
+        }
+    }
+
+    private static class Entry {
+        private Object key;
+        private Object value;
+
+        Entry(Object key, Object value) {
+            this.key = key;
+            this.value = value;
         }
     }
 
@@ -47,7 +47,7 @@ public class HashTable {
             resize();
         }
 
-        entry element = new entry(key, value);
+        Entry element = new Entry(key, value);
         Object prevValue = get(key);
         boolean isNull = false;
 
@@ -67,16 +67,16 @@ public class HashTable {
         if (table[index] == null) {
             return null;
         }
-        return table[index].Value;
+        return table[index].value;
     }
 
     Object remove(Object key) {
         int index = find(key, false);
-        entry prevElement = table[index];
+        Entry prevElement = table[index];
         if (prevElement != null) {
             table[index] = null;
             size--;
-            return prevElement.Value;
+            return prevElement.value;
         }
         return null;
     }
@@ -109,7 +109,7 @@ public class HashTable {
             }
         }
         while (true) {
-            if ((table[hash] != null && table[hash].Key.equals(key)) || (table[hash] == null && !used[hash])) {
+            if ((table[hash] != null && table[hash].key.equals(key)) || (table[hash] == null && !used[hash])) {
                 return hash;
             }
             hash++;
@@ -120,14 +120,14 @@ public class HashTable {
     }
 
     private void resize() {
-        entry[] prevTable = table;
+        Entry[] prevTable = table;
         capacity *= 2;
-        table = new entry[capacity];
+        table = new Entry[capacity];
         used = new boolean[capacity];
         size = 0;
-        for (HashTable.entry entry : prevTable) {
+        for (Entry entry : prevTable) {
             if (entry != null) {
-                put(entry.Key, entry.Value);
+                put(entry.key, entry.value);
             }
         }
         threshold = (int) (capacity * loadFactor);
